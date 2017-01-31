@@ -16,6 +16,8 @@ from PyQt5.QtCore import Qt
 from PIL import Image
 from PIL import ImageOps
 
+import logging
+
 from separateTVAndL1 import *
 
 class Main(QMainWindow):
@@ -46,6 +48,7 @@ class Main(QMainWindow):
         self.ax.get_yaxis().set_visible(False)
 
         self.setCentralWidget(canvas)
+
         self.show()
         
     def openFile(self):
