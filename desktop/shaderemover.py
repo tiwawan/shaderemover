@@ -10,11 +10,12 @@ from skimage import transform
 import matplotlib.pyplot as plt
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, qApp, QFileDialog
-from PyQt5.QtCore import Qt
 
-from PIL import Image
-from PIL import ImageOps
+from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, qApp, QFileDialog, QLabel
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QImage, QPixmap
+
+from PIL import Image, ImageOps, ImageQt
 
 import logging
 
@@ -41,30 +42,44 @@ class Main(QMainWindow):
         self.toolbar.addAction(act_save)
 
         # pyplot figure
+        
         self.fig = plt.figure()
-        canvas = FigureCanvas(self.fig)
+        self.canvas = FigureCanvas(self.fig)
         self.ax = self.fig.add_subplot(111)
         self.ax.get_xaxis().set_visible(False)
         self.ax.get_yaxis().set_visible(False)
 
-        self.setCentralWidget(canvas)
+        self.setCentralWidget(self.canvas)
+        """
+        self.lbl = QLabel(self)
+        pixmap = QPixmap("../experimental/looseleaf_ss.jpg")
+        self.lbl.setPixmap(pixmap)
+        self.setCentralWidget(self.lbl)
+        """
+        im_raw = Image.open("../experimental/looseleaf_ss.jpg")
+        gray_img = ImageOps.grayscale(im_raw)
+        gray_img = np.array(gray_img)
+        gray_img = gray_img / 255.0
+        self.ims = self.ax.imshow(gray_img, cmap="gray", vmin=0, vmax=1);
 
         self.show()
         
     def openFile(self):
+
         filepath = QFileDialog.getOpenFileName(self, 'Open file', './')
+        
         if filepath[0]:
             pass
         else:
             print("No file selected")
             return
-
+        
         try:
             im_raw = Image.open(filepath[0])
         except:
             print("Cannot Open File")
             return
-
+        
         if im_raw == None:
             print("Cannot Open File")
             return
@@ -72,18 +87,41 @@ class Main(QMainWindow):
         gray_img = ImageOps.grayscale(im_raw)
         gray_img = np.array(gray_img)
         gray_img = gray_img / 255.0
+        w_orig = gray_img.shape[1]
+        h_orig = gray_img.shape[0]
+        
+        self.shadeless = removeShade(gray_img)
 
-        S = removeShade(gray_img)
+        # make small image for preview
+        if w_orig >= h_orig and w_orig > 1000:
+            self.preview = transform.resize(self.shadeless, (1000*h_orig/w_orig, 1000))
+        elif h_orig >= w_orig and h_orig > 1000:
+            self.preview = transform.resize(self.shadeless, (1000, 1000*w_orig/h_orig))
+        else:
+            self.preview = np.array(self.shadeless)
+        
+        self.ims.set_data(self.preview);
+        
+        try:
+            self.canvas.draw();
+        except:
+            print("Unexpected error:" + str(sys.exc_info()[0]))
 
-        self.ax.imshow(S, cmap="gray", vmin=0, vmax=1)
-        self.fig.canvas.draw()
         self.is_opened = True
         print("Completed")
-        
 
     def saveFile(self):
+        filepath = QFileDialog.getSaveFileName(self, 'Open file', './')
+        if filepath[0]:
+            pass
+        else:
+            print("No file selected")
+            return
+        try:
+            plt.imsave(filepath[0], self.shadeless, cmap='gray', vmin=0, vmax=1)
+        except:
+            print("Unexpected error:" + str(sys.exc_info()[0]))
         pass
-
 
 
 def removeShade(im_orig):
@@ -113,18 +151,21 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     m = Main()
     app.exec_()
+    
     """
     im_raw = Image.open("../experimental/looseleaf_ss.jpg")
     gray_img = ImageOps.grayscale(im_raw)
     gray_img = np.array(gray_img)
     gray_img = gray_img / 255.0
 
-    S = removeShade(gray_img)
+    #S = removeShade(gray_img)
 
-    plt.imshow(S, cmap="gray", vmin=0, vmax=1)
+    ims = plt.imshow(im_raw, cmap="gray", vmin=0, vmax=1)
+    ims.set_data(np.eye(100))
     plt.colorbar()
-    plt.show()
-    """
+    plt.show()    """
+    
+    
 
 
 
