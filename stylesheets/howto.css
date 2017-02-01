@@ -1,0 +1,20 @@
+body {
+  background: #f5f5f5;
+  margin: 0% 15%;
+}
+
+h2 {
+  color:#ffffff;
+  background: #101060;
+  font-size: 1.3em;
+}
+
+h3 {
+  color: #101060;
+  font-size: 1.1em;
+}
+
+p {
+  color: #222222;
+  margin: 0px 20px;  
+}
