@@ -56,7 +56,7 @@ class Main(QMainWindow):
         self.lbl.setPixmap(pixmap)
         self.setCentralWidget(self.lbl)
         """
-        im_raw = Image.open("../experimental/looseleaf_ss.jpg")
+        im_raw = Image.open("opening.jpg")
         gray_img = ImageOps.grayscale(im_raw)
         gray_img = np.array(gray_img)
         gray_img = gray_img / 255.0
